@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,17 +11,17 @@
   (/share/) separato dalla root del sito, che resta la privacy policy.
 
   App non ancora pubblicata: nessun link reale a App Store / Google Play,
-  solo un badge "in arrivo". Quando l'app sarà live, sostituire i due
-  <span class="store-badge"> con i veri link store; quando si vorrà un
-  vero deep link (Universal Links / App Links), è questo il dominio/path
-  su cui andrà configurato.
+  solo un badge "in arrivo" (.coming-soon / .store-note). Quando l'app
+  sarà live, sostituirlo con i veri link store; quando si vorrà un vero
+  deep link (Universal Links / App Links), è questo il dominio/path su
+  cui andrà configurato.
 -->
 
-<meta name="description" content="PoseMatch: sovrapponi una foto di riferimento e scatta la tua posa perfetta, allineata." />
+<meta name="description" content="PoseMatch: overlay a reference photo on your camera and nail the perfect matching pose." />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="PoseMatch" />
-<meta property="og:description" content="Vedi la tua posa allinearsi alla reference in tempo reale, poi scatta una foto pulita, senza overlay bruciato dentro." />
-<meta property="og:image" content="https://fcaimi.github.io/pose_match_app/share/feature-graphic.png" />
+<meta property="og:description" content="See your pose match the reference in real time, then take a clean shot — no overlay burned in." />
+<meta property="og:image" content="https://fcaimi.github.io/pose_match_app/share/screen3.png" />
 <meta property="og:url" content="https://fcaimi.github.io/pose_match_app/share/" />
 <meta name="twitter:card" content="summary_large_image" />
 
@@ -99,12 +99,50 @@
     margin: 0 0 32px;
   }
 
-  .hero-image {
+  .slideshow {
+    position: relative;
     width: 100%;
-    border-radius: 20px;
+    max-width: 240px;
+    aspect-ratio: 1242 / 2688;
+    border-radius: 28px;
     border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 20px 60px -20px rgba(255, 77, 141, 0.35);
+  }
+
+  .slideshow img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .slideshow img.active {
+    opacity: 1;
+  }
+
+  .slideshow-dots {
+    display: flex;
+    gap: 6px;
     margin-bottom: 32px;
-    display: block;
+  }
+
+  .slideshow-dots button {
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: var(--border);
+    cursor: pointer;
+  }
+
+  .slideshow-dots button.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-alt));
   }
 
   .coming-soon {
@@ -172,46 +210,118 @@
     color: var(--text-primary);
     border-color: var(--text-secondary);
   }
+
+  .logo-mark {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .logo-mark svg {
+    width: 36px;
+    height: 36px;
+  }
 </style>
 </head>
 <body>
 
 <div class="lang-toggle">
-  <button type="button" data-lang="it" class="active">IT</button>
-  <button type="button" data-lang="en">EN</button>
+  <button type="button" data-lang="it">IT</button>
+  <button type="button" data-lang="en" class="active">EN</button>
 </div>
 
 <main>
+  <div class="logo-mark" aria-hidden="true">
+    <svg viewBox="0 0 1024 1024">
+      <defs>
+        <clipPath id="lensClip">
+          <circle cx="390" cy="512" r="320" />
+        </clipPath>
+      </defs>
+      <circle cx="390" cy="512" r="320" fill="#FF4D8D" />
+      <circle cx="634" cy="512" r="320" fill="#6C5CE7" />
+      <circle cx="634" cy="512" r="320" fill="#9D54B7" clip-path="url(#lensClip)" />
+    </svg>
+  </div>
+
   <h1 class="wordmark">PoseMatch</h1>
 
   <p class="tagline" data-it="Vedi la tua posa allinearsi alla reference in tempo reale, poi scatta una foto pulita, senza overlay bruciato dentro."
                        data-en="See your pose match the reference in real time, then take a clean shot — no overlay burned in.">
-    Vedi la tua posa allinearsi alla reference in tempo reale, poi scatta una foto pulita, senza overlay bruciato dentro.
+    See your pose match the reference in real time, then take a clean shot — no overlay burned in.
   </p>
 
   <p class="subtitle" data-it="Nessuna registrazione, funziona completamente offline."
                        data-en="No sign-up, works fully offline.">
-    Nessuna registrazione, funziona completamente offline.
+    No sign-up, works fully offline.
   </p>
 
-  <img class="hero-image" src="feature-graphic.png" alt="PoseMatch app screenshots" />
+  <div class="slideshow" id="slideshow">
+    <img src="screen1.png" alt="PoseMatch — scegli la reference" class="active" />
+    <img src="screen2.png" alt="PoseMatch — allinea la posa" />
+    <img src="screen3.png" alt="PoseMatch — scatto finale" />
+  </div>
+  <div class="slideshow-dots" id="slideshow-dots">
+    <button type="button" data-index="0" class="active" aria-label="Slide 1"></button>
+    <button type="button" data-index="1" aria-label="Slide 2"></button>
+    <button type="button" data-index="2" aria-label="Slide 3"></button>
+  </div>
 
   <div class="coming-soon">
     <span class="dot"></span>
-    <span data-it="Presto disponibile" data-en="Coming soon">Presto disponibile</span>
+    <span data-it="Presto disponibile" data-en="Coming soon">Coming soon</span>
   </div>
   <p class="store-note" data-it="App Store e Google Play" data-en="on the App Store and Google Play">
-    App Store e Google Play
+    on the App Store and Google Play
   </p>
 
   <footer>
     <a href="https://fcaimi.github.io/pose_match_app/" data-it="Privacy Policy" data-en="Privacy Policy">Privacy Policy</a>
     <span>·</span>
-    <a href="https://fcaimi.github.io/pose_match_app/terms.html" data-it="Termini di Servizio" data-en="Terms of Service">Termini di Servizio</a>
+    <a href="https://fcaimi.github.io/pose_match_app/terms.html" data-it="Termini di Servizio" data-en="Terms of Service">Terms of Service</a>
   </footer>
 </main>
 
 <script>
+  (function () {
+    var slides = document.querySelectorAll('#slideshow img');
+    var dots = document.querySelectorAll('#slideshow-dots button');
+    var current = 0;
+    var timer = null;
+
+    function goTo(index) {
+      current = index;
+      slides.forEach(function (img, i) {
+        img.classList.toggle('active', i === index);
+      });
+      dots.forEach(function (dot, i) {
+        dot.classList.toggle('active', i === index);
+      });
+    }
+
+    function restartAutoplay() {
+      if (timer) clearInterval(timer);
+      timer = setInterval(function () {
+        goTo((current + 1) % slides.length);
+      }, 3500);
+    }
+
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        goTo(parseInt(dot.getAttribute('data-index'), 10));
+        restartAutoplay();
+      });
+    });
+
+    restartAutoplay();
+  })();
+
   (function () {
     var nodes = document.querySelectorAll('[data-it][data-en]');
     var buttons = document.querySelectorAll('.lang-toggle button');
