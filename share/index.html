@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PoseMatch</title>
+
+<!--
+  Pagina di destinazione del link inserito nella caption di condivisione
+  (vedi lib/core/sharing/share_links.dart). Vive su un path dedicato
+  (/share/) separato dalla root del sito, che resta la privacy policy.
+
+  App non ancora pubblicata: nessun link reale a App Store / Google Play,
+  solo un badge "in arrivo". Quando l'app sarà live, sostituire i due
+  <span class="store-badge"> con i veri link store; quando si vorrà un
+  vero deep link (Universal Links / App Links), è questo il dominio/path
+  su cui andrà configurato.
+-->
+
+<meta name="description" content="PoseMatch: sovrapponi una foto di riferimento e scatta la tua posa perfetta, allineata." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="PoseMatch" />
+<meta property="og:description" content="Vedi la tua posa allinearsi alla reference in tempo reale, poi scatta una foto pulita, senza overlay bruciato dentro." />
+<meta property="og:image" content="https://fcaimi.github.io/pose_match_app/share/feature-graphic.png" />
+<meta property="og:url" content="https://fcaimi.github.io/pose_match_app/share/" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22><stop offset=%220%22 stop-color=%22%23FF4D8D%22/><stop offset=%221%22 stop-color=%22%236C5CE7%22/></linearGradient></defs><circle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22url(%23g)%22/></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg-primary: #0A0A0F;
+    --bg-secondary: #16161D;
+    --surface: #1F1F28;
+    --accent: #FF4D8D;
+    --accent-alt: #6C5CE7;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A0A0AC;
+    --border: #2A2A35;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px 32px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  h1.wordmark {
+    font-size: clamp(40px, 10vw, 56px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  p.tagline {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.5;
+    max-width: 440px;
+    margin: 0 0 8px;
+  }
+
+  p.subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 420px;
+    margin: 0 0 32px;
+  }
+
+  .hero-image {
+    width: 100%;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+    display: block;
+  }
+
+  .coming-soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .coming-soon .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+  }
+
+  .store-note {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 40px;
+  }
+
+  footer {
+    margin-top: auto;
+    padding-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  footer a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+  }
+
+  .lang-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .lang-toggle button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .lang-toggle button.active {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button type="button" data-lang="it" class="active">IT</button>
+  <button type="button" data-lang="en">EN</button>
+</div>
+
+<main>
+  <h1 class="wordmark">PoseMatch</h1>
+
+  <p class="tagline" data-it="Vedi la tua posa allinearsi alla reference in tempo reale, poi scatta una foto pulita, senza overlay bruciato dentro."
+                       data-en="See your pose match the reference in real time, then take a clean shot — no overlay burned in.">
+    Vedi la tua posa allinearsi alla reference in tempo reale, poi scatta una foto pulita, senza overlay bruciato dentro.
+  </p>
+
+  <p class="subtitle" data-it="Nessuna registrazione, funziona completamente offline."
+                       data-en="No sign-up, works fully offline.">
+    Nessuna registrazione, funziona completamente offline.
+  </p>
+
+  <img class="hero-image" src="feature-graphic.png" alt="PoseMatch app screenshots" />
+
+  <div class="coming-soon">
+    <span class="dot"></span>
+    <span data-it="Presto disponibile" data-en="Coming soon">Presto disponibile</span>
+  </div>
+  <p class="store-note" data-it="App Store e Google Play" data-en="on the App Store and Google Play">
+    App Store e Google Play
+  </p>
+
+  <footer>
+    <a href="https://fcaimi.github.io/pose_match_app/" data-it="Privacy Policy" data-en="Privacy Policy">Privacy Policy</a>
+    <span>·</span>
+    <a href="https://fcaimi.github.io/pose_match_app/terms.html" data-it="Termini di Servizio" data-en="Terms of Service">Termini di Servizio</a>
+  </footer>
+</main>
+
+<script>
+  (function () {
+    var nodes = document.querySelectorAll('[data-it][data-en]');
+    var buttons = document.querySelectorAll('.lang-toggle button');
+
+    function applyLang(lang) {
+      nodes.forEach(function (el) {
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+      buttons.forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      });
+      document.documentElement.lang = lang;
+      try { localStorage.setItem('posematch-lang', lang); } catch (e) {}
+    }
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        applyLang(btn.getAttribute('data-lang'));
+      });
+    });
+
+    var saved = null;
+    try { saved = localStorage.getItem('posematch-lang'); } catch (e) {}
+    var detected = (navigator.language || 'en').toLowerCase().indexOf('it') === 0 ? 'it' : 'en';
+    applyLang(saved || detected);
+  })();
+</script>
+
+</body>
+</html>
