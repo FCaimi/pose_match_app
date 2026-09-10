@@ -10,11 +10,25 @@
   (vedi lib/core/sharing/share_links.dart). Vive su un path dedicato
   (/share/) separato dalla root del sito, che resta la privacy policy.
 
-  App non ancora pubblicata: nessun link reale a App Store / Google Play,
-  solo un badge "in arrivo" (.coming-soon / .store-note). Quando l'app
-  sarà live, sostituirlo con i veri link store; quando si vorrà un vero
-  deep link (Universal Links / App Links), è questo il dominio/path su
-  cui andrà configurato.
+  App pubblicata. Questa pagina fa da "smart link" unico per la condivisione:
+  - su Android reindirizza subito al Play Store;
+  - su iOS/iPadOS reindirizza subito all'App Store;
+  - su desktop (o UA non riconosciuto) resta visibile con i due badge store.
+
+  Il redirect è client-side (GitHub Pages non ha redirect server-side) e gira
+  in un piccolo <script> nell'<head>, prima del render: sui telefoni la pagina
+  non viene mai disegnata, si va dritti allo store. Il crawler dell'anteprima
+  di WhatsApp/social NON esegue JS, quindi legge comunque i tag OG statici qui
+  sotto e mostra un'anteprima pulita.
+
+  Config: APPLE_APP_ID (Apple ID numerico) e il package Android sono nello
+  <script> qui sotto. Se APPLE_APP_ID torna al placeholder 'XXXXXXXXXX', il
+  redirect iOS si disattiva da solo (si cade sulla pagina con i badge) per non
+  mandare gli utenti a un link App Store rotto.
+
+  Quando si vorrà un vero deep link (Universal Links / App Links: apre l'app
+  se installata) è questo il dominio/path su cui vanno configurati i file
+  apple-app-site-association / assetlinks.json.
 -->
 
 <meta name="description" content="PoseMatch: overlay a reference photo on your camera and nail the perfect matching pose." />
@@ -24,6 +38,44 @@
 <meta property="og:image" content="https://fcaimi.github.io/pose_match_app/share/screen3.png" />
 <meta property="og:url" content="https://fcaimi.github.io/pose_match_app/share/" />
 <meta name="twitter:card" content="summary_large_image" />
+
+<script>
+  // Smart link store: definisce gli URL una volta sola e reindirizza i mobile
+  // PRIMA del render. I badge nel body riusano window.STORE_LINKS.
+  (function () {
+    // === UNICA COSA DA CONFIGURARE ===
+    // Apple ID numerico dell'app (App Store Connect → App Information → Apple ID).
+    var APPLE_APP_ID = '6796277310';
+    // =================================
+
+    var ANDROID_PACKAGE = 'com.fcaimi.posematch';
+    var links = {
+      appStore: 'https://apps.apple.com/app/id' + APPLE_APP_ID,
+      playStore: 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE,
+      appleConfigured: APPLE_APP_ID !== 'XXXXXXXXXX' && APPLE_APP_ID !== ''
+    };
+    window.STORE_LINKS = links;
+
+    try {
+      // Bypass per test / anteprima desktop:  ...?noredirect
+      if (location.search.indexOf('noredirect') !== -1) return;
+
+      var ua = navigator.userAgent || navigator.vendor || '';
+      var isAndroid = /android/i.test(ua);
+      var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+        // iPadOS 13+ si presenta come Safari desktop su Mac con touch
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (isAndroid) {
+        location.replace(links.playStore);
+      } else if (isIOS && links.appleConfigured) {
+        location.replace(links.appStore);
+      }
+    } catch (e) {
+      // Qualunque errore: si resta sulla pagina con i badge.
+    }
+  })();
+</script>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22><stop offset=%220%22 stop-color=%22%23FF4D8D%22/><stop offset=%221%22 stop-color=%22%236C5CE7%22/></linearGradient></defs><circle cx=%2216%22 cy=%2216%22 r=%2216%22 fill=%22url(%23g)%22/></svg>" />
 
@@ -145,31 +197,57 @@
     background: linear-gradient(135deg, var(--accent), var(--accent-alt));
   }
 
-  .coming-soon {
+  .store-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 0 40px;
+  }
+
+  .store-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 999px;
+    gap: 10px;
+    min-width: 180px;
+    padding: 10px 18px;
+    border-radius: 12px;
     background: var(--surface);
     border: 1px solid var(--border);
-    font-size: 14px;
-    font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease;
   }
 
-  .coming-soon .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+  .store-badge:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
   }
 
-  .store-note {
-    font-size: 13px;
+  .store-badge__glyph {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    color: var(--text-primary);
+  }
+
+  .store-badge__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    text-align: left;
+  }
+
+  .store-badge__small {
+    font-size: 11px;
+    font-weight: 500;
     color: var(--text-secondary);
-    margin: 0 0 40px;
+  }
+
+  .store-badge__big {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
   }
 
   footer {
@@ -273,13 +351,27 @@
     <button type="button" data-index="2" aria-label="Slide 3"></button>
   </div>
 
-  <div class="coming-soon">
-    <span class="dot"></span>
-    <span data-it="Presto disponibile" data-en="Coming soon">Coming soon</span>
+  <div class="store-row">
+    <a class="store-badge" id="appstore-link" href="https://apps.apple.com/app/id6796277310" rel="noopener">
+      <svg class="store-badge__glyph" viewBox="0 0 384 512" aria-hidden="true">
+        <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.1 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26 2 49.9-11.4 69.5-34.3z"/>
+      </svg>
+      <span class="store-badge__text">
+        <span class="store-badge__small" data-it="Scarica su" data-en="Download on the">Download on the</span>
+        <span class="store-badge__big">App Store</span>
+      </span>
+    </a>
+
+    <a class="store-badge" id="playstore-link" href="https://play.google.com/store/apps/details?id=com.fcaimi.posematch" rel="noopener">
+      <svg class="store-badge__glyph" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M3 2.5v19a1 1 0 0 0 1.53.85l15.5-9.5a1 1 0 0 0 0-1.7L4.53 1.65A1 1 0 0 0 3 2.5z"/>
+      </svg>
+      <span class="store-badge__text">
+        <span class="store-badge__small" data-it="Scaricala da" data-en="Get it on">Get it on</span>
+        <span class="store-badge__big">Google Play</span>
+      </span>
+    </a>
   </div>
-  <p class="store-note" data-it="App Store e Google Play" data-en="on the App Store and Google Play">
-    on the App Store and Google Play
-  </p>
 
   <footer>
     <a href="https://fcaimi.github.io/pose_match_app/" data-it="Privacy Policy" data-en="Privacy Policy">Privacy Policy</a>
@@ -289,6 +381,16 @@
 </main>
 
 <script>
+  // Allinea gli href dei badge agli URL definiti nell'<head> (fonte unica).
+  (function () {
+    var links = window.STORE_LINKS;
+    if (!links) return;
+    var appStore = document.getElementById('appstore-link');
+    var playStore = document.getElementById('playstore-link');
+    if (appStore && links.appleConfigured) appStore.href = links.appStore;
+    if (playStore) playStore.href = links.playStore;
+  })();
+
   (function () {
     var slides = document.querySelectorAll('#slideshow img');
     var dots = document.querySelectorAll('#slideshow-dots button');
