@@ -49,9 +49,30 @@
     // =================================
 
     var ANDROID_PACKAGE = 'com.fcaimi.posematch';
+
+    // Attribuzione installazioni Android: gli utm_* del link di condivisione
+    // passano al Play Store come `referrer`, così Firebase Analytics li legge
+    // al primo avvio. Per tenere corto il link nell'app, i link di condivisione
+    // portano solo un codice campagna (?c=fc) che qui viene espanso; restano
+    // validi anche i link con gli utm_* espliciti.
+    var CAMPAIGNS = {
+      // Bottone "Sfida un amico" di Screen 3 (docs/spec.md sezione 6.11.2).
+      fc: 'utm_source=app&utm_medium=friend_challenge&utm_campaign=posematchchallenge'
+    };
+
+    function playReferrer() {
+      var keep = [];
+      location.search.replace(/^\?/, '').split('&').forEach(function (kv) {
+        if (/^utm_(source|medium|campaign|content|term)=[^&]*$/.test(kv)) keep.push(kv);
+        var code = /^c=([a-z0-9]+)$/.exec(kv);
+        if (code && CAMPAIGNS[code[1]]) keep.push(CAMPAIGNS[code[1]]);
+      });
+      return keep.length ? '&referrer=' + encodeURIComponent(keep.join('&')) : '';
+    }
+
     var links = {
       appStore: 'https://apps.apple.com/app/id' + APPLE_APP_ID,
-      playStore: 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE,
+      playStore: 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE + playReferrer(),
       appleConfigured: APPLE_APP_ID !== 'XXXXXXXXXX' && APPLE_APP_ID !== ''
     };
     window.STORE_LINKS = links;
